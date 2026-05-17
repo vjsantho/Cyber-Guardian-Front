@@ -43,6 +43,7 @@ export default function Navbar() {
     { name: 'Features', path: '/features' },
     { name: 'Quizzes', path: '/quizzes' },
     { name: 'Tips', path: '/tips' },
+    { name: 'Dashboard', path: '/dashboard' },
     { name: 'Contact', path: '/contact' },
   ];
 

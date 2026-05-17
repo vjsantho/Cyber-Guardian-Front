@@ -10,8 +10,8 @@ const modules = [
     description: "Learn how to build unbreakable passwords.",
     icon: <Lock className="w-8 h-8 text-blue-500" />,
     color: "bg-blue-50 dark:bg-blue-900/20",
-    progress: 100,
-    status: "completed",
+    progress: 0,
+    status: "in_progress",
     duration: "15 mins",
     content: {
       intro: "A strong password is your first line of defense. Weak passwords are like leaving your front door unlocked!",
@@ -41,8 +41,8 @@ const modules = [
     description: "Spot fake emails and messages.",
     icon: <ShieldAlert className="w-8 h-8 text-purple-500" />,
     color: "bg-purple-50 dark:bg-purple-900/20",
-    progress: 45,
-    status: "in_progress",
+    progress: 0,
+    status: "locked",
     duration: "20 mins",
     content: {
       intro: "Phishing attacks trick you into giving away your personal information. Learn to spot the warning signs!",

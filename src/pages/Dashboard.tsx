@@ -6,16 +6,29 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getCurrentUser } from '../utils/authStore';
 
 export default function Dashboard() {
   const [isDark, setIsDark] = useState(false);
   const navigate = useNavigate();
 
+  const [studentName, setStudentName] = useState('Student');
+  const [overallProgress, setOverallProgress] = useState(0);
+
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
       setIsDark(true);
     }
-  }, []);
+
+    const user = getCurrentUser();
+    if (!user) {
+      toast.error('Please log in to access your student dashboard.');
+      navigate('/login');
+      return;
+    }
+    setStudentName(user.name);
+    setOverallProgress(user.progress || 0);
+  }, [navigate]);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -101,10 +114,10 @@ export default function Dashboard() {
 
             <div className="z-10 w-full">
               <h1 className="text-4xl font-display font-bold text-slate-900 dark:text-white mb-3">
-                Good Day, <span className="text-primary-600 dark:text-primary-400">Student!</span> 👋
+                Good Day, <span className="text-primary-600 dark:text-primary-400">{studentName}!</span> 👋
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium text-lg">
-                You're on a 14-day streak! Keep learning to earn your Cyber Champion certificate.
+                Welcome back to your Cyber Security training hub! Keep learning to earn your Cyber Champion certificate.
               </p>
               
               <div className="flex flex-wrap gap-4">
@@ -179,7 +192,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Overall</p>
-                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">65%</p>
+                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{overallProgress}%</p>
                 </div>
               </div>
 

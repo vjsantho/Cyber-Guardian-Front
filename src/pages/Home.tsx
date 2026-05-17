@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 
 
-const containerVariants = {
+const containerVariants: any = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -15,7 +15,7 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: any = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -24,7 +24,7 @@ const itemVariants = {
   }
 };
 
-const textVariants = {
+const textVariants: any = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: { 
     opacity: 1, 

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Lock, EyeOff, Smartphone, ShieldAlert, PlayCircle, BookOpen, X, ChevronRight, CheckCircle2, Trophy, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { getCurrentUser, completeModule } from '../utils/authStore';
 
 const modules = [
   {
@@ -132,7 +134,7 @@ const modules = [
 
 type Module = typeof modules[0];
 
-function LessonModal({ mod, onClose }: { mod: Module; onClose: () => void }) {
+function LessonModal({ mod, onClose, onComplete }: { mod: Module; onClose: () => void; onComplete: () => void }) {
   const [step, setStep] = useState(0); 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -301,7 +303,7 @@ function LessonModal({ mod, onClose }: { mod: Module; onClose: () => void }) {
             ) : <div />}
 
             {isDone ? (
-              <button onClick={onClose} className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-green-500/25 transition-all">
+              <button onClick={() => { onComplete(); onClose(); }} className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-green-500/25 transition-all">
                 <CheckCircle2 className="w-5 h-5" /> Done!
               </button>
             ) : isQuizPhase ? (
@@ -331,14 +333,46 @@ function LessonModal({ mod, onClose }: { mod: Module; onClose: () => void }) {
 }
 
 export default function Learn() {
+  const navigate = useNavigate();
   const [activeModule, setActiveModule] = useState<Module | null>(null);
+  const [completedIds, setCompletedIds] = useState<number[]>([]);
 
-  const handleModuleAction = (mod: Module) => {
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) {
+      toast.error('Please log in to access the learning modules.');
+      navigate('/login');
+      return;
+    }
+    setCompletedIds(user.completedModules || []);
+  }, [navigate]);
+
+  // Compute dynamic module statuses based on completedIds
+  const resolvedModules = modules.map((mod, idx) => {
+    if (completedIds.includes(mod.id)) {
+      return { ...mod, status: 'completed' as const, progress: 100 };
+    }
+    // First uncompleted module is always unlocked
+    const allPrevDone = modules.slice(0, idx).every(m => completedIds.includes(m.id));
+    if (allPrevDone) {
+      return { ...mod, status: 'in_progress' as const, progress: 0 };
+    }
+    return { ...mod, status: 'locked' as const, progress: 0 };
+  });
+
+  const handleComplete = (modId: number) => {
+    completeModule(modId);
+    const user = getCurrentUser();
+    setCompletedIds(user?.completedModules || []);
+    toast.success('🏆 Module completed! Next module unlocked!');
+  };
+
+  const handleModuleAction = (mod: typeof resolvedModules[0]) => {
     if (mod.status === 'locked') {
       toast.warning(`"${mod.title}" is locked. Complete previous modules to unlock!`);
       return;
     }
-    setActiveModule(mod);
+    setActiveModule(mod as Module);
   };
 
   return (
@@ -351,7 +385,7 @@ export default function Learn() {
         <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
       </div>
 
-      {activeModule && <LessonModal mod={activeModule} onClose={() => setActiveModule(null)} />}
+      {activeModule && <LessonModal mod={activeModule} onClose={() => setActiveModule(null)} onComplete={() => handleComplete(activeModule.id)} />}
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12">
@@ -375,13 +409,13 @@ export default function Learn() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {modules.map((mod, idx) => (
+          {resolvedModules.map((mod, idx) => (
             <motion.div
               key={mod.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => mod.status === 'locked' && handleModuleAction(mod)}
+              onClick={() => handleModuleAction(mod)}
               className={`relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border-2 transition-all duration-300 hover:shadow-xl ${
                 mod.status === 'locked'
                   ? 'border-slate-100 dark:border-slate-800 opacity-75 cursor-not-allowed'

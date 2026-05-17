@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Mail, Lock, User, UserCheck, ArrowRight } from 'lucide-react';
+import { Shield, Mail, Lock, User, UserCheck, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { registerAccount } from '../utils/authStore';
 
@@ -13,6 +13,7 @@ export default function Signup() {
     confirmPassword: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate();
 
@@ -39,9 +40,17 @@ export default function Signup() {
       toast.error('Please choose a stronger password!');
       return;
     }
-    registerAccount(formData.name, formData.email);
-    toast.success(`Account created successfully! Welcome to the team, ${formData.name}!`);
-    navigate('/dashboard');
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
+    try {
+      registerAccount(formData.name, formData.email, formData.password);
+      toast.success(`Account created! Welcome aboard, ${formData.name}! 🎉`);
+      navigate('/learn');
+    } catch (err: any) {
+      toast.error(err.message || 'Registration failed. Please try again.');
+    }
   };
 
   return (
@@ -65,6 +74,7 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Your Hero Name
@@ -85,6 +95,7 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Email Address
@@ -105,23 +116,31 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Secret Password
+                Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-slate-900 dark:text-white placeholder-slate-400"
+                  className="block w-full pl-11 pr-12 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-slate-900 dark:text-white placeholder-slate-400"
                   placeholder="Create a strong password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
               
               {/* Password Strength Meter */}
@@ -144,9 +163,37 @@ export default function Signup() {
                     {passwordStrength === 1 && 'Weak'}
                     {passwordStrength === 2 && 'Fair'}
                     {passwordStrength === 3 && 'Good'}
-                    {passwordStrength === 4 && 'Strong!'}
+                    {passwordStrength === 4 && 'Strong! ✅'}
                   </p>
                 </div>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`block w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-slate-900/50 border rounded-xl focus:ring-2 focus:ring-primary-500 transition-colors text-slate-900 dark:text-white placeholder-slate-400 ${
+                    formData.confirmPassword && formData.confirmPassword !== formData.password
+                      ? 'border-red-400 focus:border-red-400'
+                      : 'border-slate-200 dark:border-slate-700 focus:border-primary-500'
+                  }`}
+                  placeholder="Re-enter your password"
+                />
+              </div>
+              {formData.confirmPassword && formData.confirmPassword !== formData.password && (
+                <p className="text-xs mt-1 text-red-500">Passwords do not match</p>
               )}
             </div>
 

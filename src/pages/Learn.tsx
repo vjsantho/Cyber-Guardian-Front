@@ -184,7 +184,7 @@ function LessonModal({ mod, onClose }: { mod: Module; onClose: () => void }) {
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: 'spring' as any, stiffness: 300, damping: 30 }}
           className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col"
           onClick={e => e.stopPropagation()}
         >

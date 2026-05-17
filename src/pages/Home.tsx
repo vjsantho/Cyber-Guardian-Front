@@ -20,7 +20,7 @@ const itemVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { type: 'spring', stiffness: 100 }
+    transition: { type: 'spring' as any, stiffness: 100 }
   }
 };
 
@@ -29,7 +29,7 @@ const textVariants = {
   visible: { 
     opacity: 1, 
     scale: 1,
-    transition: { type: 'spring', bounce: 0.5, duration: 1 }
+    transition: { type: 'spring' as any, bounce: 0.5, duration: 1 }
   }
 };
 
@@ -116,7 +116,7 @@ export default function Home() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+              transition={{ duration: 0.8, type: 'spring' as any, bounce: 0.4 }}
               className="relative lg:ml-10"
             >
               <div className="relative z-10 group">

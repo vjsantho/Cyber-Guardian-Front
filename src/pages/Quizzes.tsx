@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, Award, ArrowRight, RefreshCcw, BrainCircuit, Trophy } from 'lucide-react';
+import { ArrowRight, RefreshCcw, Trophy } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const quizQuestions = [

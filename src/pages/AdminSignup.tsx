@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Mail, Lock, User, Building, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { registerAdmin } from '../utils/authStore';
 
 export default function AdminSignup() {
   const navigate = useNavigate();
@@ -21,9 +22,13 @@ export default function AdminSignup() {
       setStep(2);
       return;
     }
-    
-    toast.success("Admin account created successfully! Welcome to CyberGuardians.");
-    setTimeout(() => navigate('/admin'), 1500);
+    try {
+      registerAdmin(formData.name, formData.email, formData.password, formData.organization, formData.role);
+      toast.success('Admin account created! Welcome to CyberGuardians. 🛡️');
+      setTimeout(() => navigate('/admin'), 1500);
+    } catch (err: any) {
+      toast.error(err.message || 'Registration failed.');
+    }
   };
 
   return (
@@ -154,7 +159,7 @@ export default function AdminSignup() {
 
         <div className="mt-8 text-center">
           <p className="text-slate-500 text-sm">
-            Already an administrator? <Link to="/admin" className="text-primary-400 font-bold hover:underline">Login here</Link>
+            Already an administrator? <Link to="/admin/login" className="text-primary-400 font-bold hover:underline">Login here</Link>
           </p>
         </div>
       </motion.div>

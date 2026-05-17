@@ -8,7 +8,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getAccounts, getActivityLog, type StudentAccount, type ActivityLog } from '../utils/authStore';
+import { getAccounts, getActivityLog, getCurrentAdmin, logoutAdmin, type StudentAccount, type ActivityLog } from '../utils/authStore';
 
 const data = [
   { name: 'Mon', students: 400, completions: 240 },
@@ -48,8 +48,14 @@ export default function AdminDashboard() {
   const [editingModuleIndex, setEditingModuleIndex] = useState<number | null>(null);
   const [editingModuleName, setEditingModuleName] = useState('');
 
-  // Auto-refresh live data every 5 seconds
+  // Session guard + auto-refresh live data every 5 seconds
   useEffect(() => {
+    const admin = getCurrentAdmin();
+    if (!admin) {
+      toast.error('Please log in to access the Admin Portal.');
+      navigate('/admin/login');
+      return;
+    }
     const refresh = () => {
       setLiveAccounts(getAccounts());
       setActivityLog(getActivityLog());
@@ -57,7 +63,7 @@ export default function AdminDashboard() {
     refresh();
     const interval = setInterval(refresh, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [navigate]);
 
   const filteredAccounts = liveAccounts.filter(
     a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -65,8 +71,9 @@ export default function AdminDashboard() {
   );
 
   const handleLogout = () => {
-    toast.success("Logging out of admin portal...");
-    navigate('/login');
+    logoutAdmin();
+    toast.success('Logged out of admin portal.');
+    navigate('/admin/login');
   };
 
   const handleAction = (action: string) => {

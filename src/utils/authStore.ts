@@ -24,6 +24,8 @@ export interface ActivityLog {
 const ACCOUNTS_KEY = 'cg_student_accounts';
 const ACTIVITY_KEY = 'cg_activity_log';
 const SESSION_KEY = 'cg_current_user';
+const ADMIN_ACCOUNTS_KEY = 'cg_admin_accounts';
+const ADMIN_SESSION_KEY = 'cg_current_admin';
 
 // ─── Accounts ────────────────────────────────────────────────────────────────
 
@@ -165,3 +167,80 @@ function logActivity(type: 'signup' | 'login', name: string, email: string) {
   // Keep only last 50 entries
   localStorage.setItem(ACTIVITY_KEY, JSON.stringify(log.slice(0, 50)));
 }
+
+// ─── Admin Auth ───────────────────────────────────────────────────────────────
+
+export interface AdminAccount {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  organization: string;
+  role: string;
+  createdAt: string;
+}
+
+function getAdminAccounts(): AdminAccount[] {
+  try {
+    return JSON.parse(localStorage.getItem(ADMIN_ACCOUNTS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveAdminAccounts(accounts: AdminAccount[]) {
+  localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(accounts));
+}
+
+export function registerAdmin(name: string, email: string, password: string, organization: string, role: string): AdminAccount {
+  const accounts = getAdminAccounts();
+  const existing = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  if (existing) {
+    throw new Error('An admin account with this email already exists. Please log in.');
+  }
+  const newAdmin: AdminAccount = {
+    id: `adm_${Date.now()}`,
+    name,
+    email: email.toLowerCase(),
+    password,
+    organization,
+    role,
+    createdAt: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+  };
+  accounts.unshift(newAdmin);
+  saveAdminAccounts(accounts);
+  setCurrentAdmin(newAdmin);
+  return newAdmin;
+}
+
+export function loginAdmin(email: string, password: string): AdminAccount {
+  const accounts = getAdminAccounts();
+  const admin = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  if (!admin) {
+    throw new Error('No admin account found with this email. Please sign up first.');
+  }
+  if (admin.password !== password) {
+    throw new Error('Incorrect password. Please try again.');
+  }
+  setCurrentAdmin(admin);
+  return admin;
+}
+
+export function setCurrentAdmin(admin: AdminAccount) {
+  localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(admin));
+}
+
+export function getCurrentAdmin(): AdminAccount | null {
+  try {
+    const data = localStorage.getItem(ADMIN_SESSION_KEY);
+    if (!data) return null;
+    return JSON.parse(data) as AdminAccount;
+  } catch {
+    return null;
+  }
+}
+
+export function logoutAdmin() {
+  localStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
